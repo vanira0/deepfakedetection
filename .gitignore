@@ -1,0 +1,97 @@
+# Python cache
+*.pyc
+__pycache__/
+
+# Virtual environment
+venv/
+env/
+
+# IDEs and text editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Databases
+*.db
+*.sqlite
+
+# Temporary files
+*.tmp
+*.temp
+
+# Build outputs
+*.pyd
+*.so
+*.dll
+*.exe
+
+# OS generated files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# IDE-specific files
+.vscode/
+.idea/
+
+# Output directories
+/dist/
+/build/
+/output/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+logs/
+*.log
+
+# Gravure cache
+gravure_cache/
+
+# Webpacker cache
+webpacker/cache
+
+# Node.js
+node_modules/
+npm-debug.log
+
+# Yarn
+.yarn/*
+!.yarn/coverage
+
+# Bower
+bower_components/
+
+# Old versions of dependencies
+dependencies/
+
+# NPM artifacts
+.npm
+
+# Docker
+docker-compose.yml
+.dockerignore
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Git
+.git
+.gitattributes
+.gitignore_global
+
+.data/
+
+/dlib-19.24.99-cp312-cp312-win_amd64.whl
