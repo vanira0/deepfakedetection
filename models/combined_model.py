@@ -1,38 +1,29 @@
 from tensorflow.keras.models import Model
-from tensorflow.keras.layers import Input,TimeDistributed, MaxPooling2D, Flatten, Concatenate
+from tensorflow.keras.layers import Input, TimeDistributed, Dense, Concatenate
 from .gru import create_gru_model
 from .efficientnet import create_efficientnet_base
 
 def create_combined_model(num_frames, frame_height, frame_width, channels):
+    # Video input
     video_input = Input(shape=(num_frames, frame_height, frame_width, channels), name='video_input')
     
     # Base CNN (EfficientNetB0)
-    base_cnn_inputs, base_cnn_output = create_efficientnet_base((frame_height, frame_width, channels))
+    efficientnet_model = create_efficientnet_base((frame_height, frame_width, channels))
+    frame_features = TimeDistributed(efficientnet_model, name='time_distributed_efficientnet')(video_input)
     
-    # Feature extraction for each frame
-    encoded_frames = TimeDistributed(base_cnn_inputs)(video_input)
+    # Feature transformation (instead of spatial pooling)
+    def transform_features(x):
+        # Apply dense layers to transform the feature vector
+        transformed = TimeDistributed(Dense(512, activation='relu', name='dense_transform'))(x)
+        return transformed
     
-    # Multi-scale feature extraction
-    def multi_scale_features(x):
-        x_small = TimeDistributed(MaxPooling2D(pool_size=(2, 2)))(x)
-        x_small = TimeDistributed(Flatten())(x_small)
-        
-        x_large = TimeDistributed(MaxPooling2D(pool_size=(4, 4)))(x)
-        x_large = TimeDistributed(Flatten())(x_large)
-        
-        x = TimeDistributed(Flatten())(x)
-        
-        x_combined = Concatenate()([x, x_small, x_large])
-        return x_combined
+    transformed_features = transform_features(frame_features)
     
-    encoded_frames = multi_scale_features(encoded_frames)
+    # GRU Model
+    gru_model = create_gru_model(num_frames, transformed_features.shape[-1])
+    gru_output = gru_model(transformed_features)
     
-    # GRU for temporal dependencies
-    gru_inputs, gru_outputs = create_gru_model(num_frames, encoded_frames.shape[-1])
-    
-    # Combine models
-    combined_output = gru_outputs(encoded_frames)
-    
-    model = Model(inputs=video_input, outputs=combined_output, name='EfficientNetB0_GRU_Hybrid')
+    # Combined model
+    model = Model(inputs=video_input, outputs=gru_output, name='EfficientNet_GRU_Hybrid')
     
     return model

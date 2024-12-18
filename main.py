@@ -24,28 +24,25 @@ def main():
 
     # Create data loaders
     train_loader, val_loader = create_train_val_loaders(
-        train_csv=config['dataset']['metadata_dir'] + 'train_annotations.csv',
-        val_csv=config['dataset']['metadata_dir'] + 'val_annotations.csv',
+        train_csv=os.path.join(config['dataset']['metadata_dir'], 'train_annotations.csv'),
+        val_csv=os.path.join(config['dataset']['metadata_dir'], 'val_annotations.csv'),
         batch_size=config['training']['batch_size'],
         image_size=tuple(config['preprocessing']['image_size']),
         max_frames=config['preprocessing']['max_frames']
     )
 
+    print("Start Initializing model")
     # Initialize model
-    # model = CombinedModel(input_shape=(config['preprocessing']['max_frames'], *config['preprocessing']['image_size'], 3),
-    #                       num_classes=2,
-    #                       efficientnet_variant=config['model']['efficientnet_variant'],
-    #                       gru_units=config['model']['gru_units'],
-    #                       dense_layers=config['model']['dense_layers'])
     num_frames = config['preprocessing']['max_frames']
     frame_height, frame_width = config['preprocessing']['image_size']
     channels = 3
     
     model = create_combined_model(num_frames, frame_height, frame_width, channels)
-
+    print("model combined Successfully")
     # Compile model
     optimizer = Adam(learning_rate=config['training']['learning_rate'])
     model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy'])
+    model.summary()
 
     # Define callbacks
     early_stopping = EarlyStopping(monitor='val_loss', patience=config['callbacks']['early_stopping_patience'])
@@ -53,11 +50,13 @@ def main():
                                   patience=config['callbacks']['reduce_lr_patience'], min_delta=0.001, verbose=1)
 
     # Train the model
-    history = model.fit(train_loader, 
-                         validation_data=val_loader, 
-                         epochs=config['training']['epochs'],
-                         callbacks=[early_stopping, reduce_lr],
-                         verbose=1)
+    history = model.fit(
+        train_loader, 
+        validation_data=val_loader, 
+        epochs=config['training']['epochs'],
+        callbacks=[early_stopping, reduce_lr],
+        verbose=1
+    )
 
     # Save the best model
     model.save(os.path.join(exp_dir, 'best_model.h5'))
