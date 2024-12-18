@@ -9,7 +9,7 @@
 
     "preprocessing": {
         "image_size": [224, 224],
-        "max_frames": 30,
+        "max_frames": 15,
         "frame_sampling_strategy": "uniform",
         "face_detection_model": "haar_cascade"
     },

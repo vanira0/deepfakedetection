@@ -1,3 +1,4 @@
+# video_processor.py
 import cv2
 import os
 from albumentations import Compose, HorizontalFlip, RandomBrightnessContrast, GaussianBlur
@@ -11,7 +12,13 @@ def get_augmentation_pipeline():
     ])
 
 def process_video(video_path, label, output_dir, augment=False):
+    if not os.path.exists(video_path):
+        raise FileNotFoundError(f"Video file {video_path} not found.")
+
     cap = cv2.VideoCapture(video_path)
+    if not cap.isOpened():
+        raise ValueError(f"Failed to open video file {video_path}.")
+
     frame_rate = int(cap.get(cv2.CAP_PROP_FPS))
     frame_count = 0
     aug_pipeline = get_augmentation_pipeline() if augment else None
@@ -30,7 +37,7 @@ def process_video(video_path, label, output_dir, augment=False):
             faces = detect_faces(gray)
             for i, face_rect in enumerate(faces):
                 face = extract_face(frame, face_rect)
-                
+
                 if face.size > 0:
                     face = cv2.resize(face, (224, 224))
 
@@ -44,5 +51,3 @@ def process_video(video_path, label, output_dir, augment=False):
         frame_count += 1
 
     cap.release()
-
-# Remove the detect_faces function from this file
