@@ -40,7 +40,7 @@ Tested on combined datasets: **Celeb-DF (v2)** and **DFDC**
 
 ## 🧠 Architecture
 
-See [`model_architecture.png`](./docs/model_architecture.png) for visual representation.
+See [`model_architecture.png`](./model_architecture.png) for visual representation.
 
 ---
 
